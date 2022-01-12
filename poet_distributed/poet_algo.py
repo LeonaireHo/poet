@@ -387,7 +387,7 @@ class MultiESOptimizer:
             print("flechette", flechette.keys())
             for optim_id in flechette.keys():
                 print("save model id:",str(optim_id))
-                flechette[optim_id].save_model('model'+str(optim_id))
+                flechette[optim_id].model.save_model('model'+str(optim_id))
             self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
             for o in self.optimizers.values():
