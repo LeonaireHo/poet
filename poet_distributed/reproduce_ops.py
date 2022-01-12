@@ -101,7 +101,7 @@ class Reproducer:
         if 'distance' in self.categories:
             max_d = 100
             min_d = 1
-            distance = mutate_rand(init_height, max_d, min_d,rp = max(distance,5))
+            distance = mutate_rand(init_height, max_d, min_d,rp = max(distance,10))
 
         if 'radius' in self.categories:
             max_r = 2
