@@ -390,8 +390,7 @@ class MultiESOptimizer:
             # for optim_id in flechette.keys():
             #     print("save model id:",str(optim_id))
             #     flechette[optim_id].model.save_model('model'+str(optim_id))
-            self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
-                                    max_num_envs=self.args.max_num_envs)
+
             if iteration == iterations - self.args.adjust_interval * steps_before_transfer * self.args.max_num_envs:
                 hard_env_config = Env_config(
                                     name='tablette_dur',
@@ -401,7 +400,10 @@ class MultiESOptimizer:
                                     distance=100,
                                     radius=0.1)
                 self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
-                                            max_num_envs=self.args.max_num_envs, env=hard_env_config)
+                              max_num_envs=self.args.max_num_envs, env=hard_env_config)
+            else:
+                self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
+                                            max_num_envs=self.args.max_num_envs)
             for o in self.optimizers.values():
                 o.clean_dicts_before_iter()
             self.ind_es_step(iteration=iteration)
