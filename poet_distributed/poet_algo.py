@@ -370,7 +370,7 @@ class MultiESOptimizer:
                  checkpointing=False,
                  reset_optimizer=True,
                  poet = True):
-        print("flechette''''''''''''''''''''''")
+
         for iteration in range(iterations):
             if not poet:
                 print('.', iteration, end='')
@@ -384,11 +384,10 @@ class MultiESOptimizer:
 
             flechette = self.fiber_shared["flechettes"]
             #save model
+            print("flechette", flechette.keys())
             for optim_id in flechette.keys():
                 print("save model id:",str(optim_id))
                 flechette[optim_id].save_model('model'+str(optim_id))
-
-            print("flechette", flechette.keys())
             self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
             for o in self.optimizers.values():
