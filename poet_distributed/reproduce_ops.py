@@ -29,7 +29,7 @@ class Reproducer:
         self.rs = np.random.RandomState(args.master_seed)
         # self.categories = list(args.envs)
         # print('cate',self.categories)
-        self.categories = ['init_height','init_speed_x','init_speed_y','distance','radius']
+        self.categories = ['init_height','init_speed_z','init_speed_x','distance','radius']
     def pick(self, arr):
         return self.rs.choice(arr)
 
@@ -68,12 +68,12 @@ class Reproducer:
 
     def mutate(self, parent):
         init_height=parent.init_height
+        init_speed_z=parent.init_speed_z
         init_speed_x=parent.init_speed_x
-        init_speed_y=parent.init_speed_y
         distance=parent.distance
         radius=parent.radius
 
-        init_height, init_speed_x,init_speed_y, distance, radius
+
         def mutate_rand(v,max,min,rn = 0,rp = 1):
             v = v + self.rs.uniform(rn, rp)
             if v > max:
@@ -86,17 +86,17 @@ class Reproducer:
             min_height = 0
             init_height = mutate_rand(init_height,max_height,min_height)
 
-        if 'init_speed_x' in self.categories:
+        if 'init_speed_z' in self.categories:
             max_speed = 100
             min_speed = 0
-            init_speed_x = max(abs(init_speed_x),5)
-            init_speed_x = mutate_rand(init_height, max_speed, min_speed,rp = init_speed_x)
+            init_speed_z = max(abs(init_speed_x),5)
+            init_speed_z = mutate_rand(init_height, max_speed, min_speed,rp = init_speed_z)
 
         if 'init_speed_y' in self.categories:
             max_speed = 100
             min_speed = 0
-            init_speed_y = max(abs(init_speed_y),5)
-            init_speed_y = mutate_rand(init_height, max_speed, min_speed,rp = init_speed_y)
+            init_speed_x = max(abs(init_speed_x),5)
+            init_speed_x = mutate_rand(init_height, max_speed, min_speed,rp = init_speed_x)
 
         if 'distance' in self.categories:
             max_d = 100
@@ -110,13 +110,13 @@ class Reproducer:
 
 
 
-        child_name = name_env_config(init_height,init_speed_x,init_speed_y,distance,radius)
+        child_name = name_env_config(init_height,init_speed_z,init_speed_x,distance,radius)
 
         child = Env_config(
             name=child_name,
             init_height=init_height,
-            init_speed_x=init_speed_x,
-            init_speed_y=init_speed_y,
+            init_speed_x=init_speed_z,
+            init_speed_y=init_speed_x,
             distance=distance,
             radius=radius
             )

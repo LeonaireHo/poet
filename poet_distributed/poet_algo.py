@@ -27,21 +27,21 @@ from poet_distributed.novelty import compute_novelty_vs_archive
 import json
 
 
-def construct_niche_fns_from_env(args, env, seed):
-    def niche_wrapper(configs, seed):  # force python to make a new lexical scope
-        def make_niche():
+def construct_flechette_fns_from_env(args, env, seed):
+    def flechette_agnet(configs, seed):  # force python to make a new lexical scope
+        def make_flechette():
             from poet_distributed.niches import Flechette
             return Flechette(env_configs=configs,
                               seed=seed,
                               init=args.init,
                               stochastic=args.stochastic)
 
-        return make_niche
+        return make_flechette
 
     niche_name = env.name
     configs = (env,)
 
-    return niche_name, niche_wrapper(list(configs), seed)
+    return niche_name, flechette_agnet(list(configs), seed)
 
 
 class MultiESOptimizer:
@@ -108,8 +108,8 @@ class MultiESOptimizer:
             env = Env_config(
                 name='tablette',
                 init_height=1,
+                init_speed_z=1,
                 init_speed_x=1,
-                init_speed_y=1,
                 distance=1,
                 radius=1)
 
@@ -119,13 +119,13 @@ class MultiESOptimizer:
 
         assert env != None
 
-        optim_id, niche_fn = construct_niche_fns_from_env(args=self.args, env=env, seed=seed)
+        optim_id, flechette_fn = construct_flechette_fns_from_env(args=self.args, env=env, seed=seed)
 
-        niche = niche_fn()
+        flechette = flechette_fn()
         if model_params is not None:
             theta = np.array(model_params)
         else:
-            theta = niche.initial_theta()
+            theta = flechette.initial_theta()
         assert optim_id not in self.optimizers.keys()
 
         return ESOptimizer(
@@ -133,7 +133,7 @@ class MultiESOptimizer:
             fiber_pool=self.fiber_pool,
             fiber_shared=self.fiber_shared,
             theta=theta,
-            make_niche=niche_fn,
+            make_niche=flechette_fn,
             learning_rate=self.args.learning_rate,
             lr_decay=self.args.lr_decay,
             lr_limit=self.args.lr_limit,

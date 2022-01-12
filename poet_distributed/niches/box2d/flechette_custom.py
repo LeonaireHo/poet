@@ -43,12 +43,12 @@ from collections import namedtuple
 # To solve hardcore version you need 300 points in 2000 time steps.
 #
 # Created by Oleg Klimov. Licensed on the same terms as the rest of OpenAI Gym.
-
+G = 10
 Env_config = namedtuple('Env_config', [
     'name',
     'init_height',
+    'init_speed_z',
     'init_speed_x',
-    'init_speed_y',
     'distance',
     'radius'
 ])
@@ -143,6 +143,29 @@ class FlechetteCustom(gym.Env):
         self.viewer = None
         self._reset()
 
+    def calcule_distance(v0,a,t):#speed_init,a,t
+        return 0.5 * a * t * t + v0 * t
+
+    def sensor(self):
+        '''
+        'init_height',
+        'init_speed_z',
+        'init_speed_x',
+        'distance',
+        'radius'
+        to
+        #height0,height1,height2,posX2,posX3,distance
+        '''
+        height0 = self.config.init_height
+        v0z = self.config.init_speed_x
+        v0x = self.config.init_speed_z
+        height1 = height0 - self.calcule_distance(v0z,G,1)
+        height2 = height0 - self.calcule_distance(v0z,G,2)
+        posX1 = self.calcule_distance(v0x,0,1)
+        posX2 = self.calcule_distance(v0x,0,2)
+
+        return height0,height1,height2,posX1,posX2,self.config.distance
+
     def set_env_config(self, env_config):
         self.config = env_config
 
@@ -164,27 +187,30 @@ class FlechetteCustom(gym.Env):
         return self._step(action)
 
     def _step(self, action):
-        speed_x = action[0]
-        speed_y = action[1]
-        #Action[speed_x, speed_y]
+        speed_x = action[0]#x dans la face de movement de tablette
+        speed_y = action[1]#distance
+        speed_z = action[2]#hauteur
+        #Action[speed_z, speed_y]
         #self.config[name='default_env',init_height = 0,init_speed = 0,distance = min_dist,radius = 1]
         hit = False
         done = False
-        state = [self.config.init_height,self.config.init_speed_x,self.config.init_speed_y,self.config.distance]
-        def calcule_distance(v0,a,t):
-            return 0.5 * a * t * t + v0 * t
-        time = self.config.distance / (speed_x-self.config.init_speed_x)
-        G = 10
-        h_target = self.config.init_height - calcule_distance(self.config.init_speed_y,G,time)
-        h_agent =  - calcule_distance(speed_y,G,time)
-        resultat_distance = abs(h_target - h_agent)
+        height0, height1, height2, posX1, posX2,distance = self.sensor()
+        state = [height0, height1, height2, posX1, posX2,distance]
+
+        time = distance / speed_y
+        h_target = height0 - self.calcule_distance(self.config.init_speed_z,G,time)
+        h_agent =  - self.calcule_distance(speed_z,G,time)
+        different_h = abs(h_target - h_agent)
+        x_target = self.calcule_distance(self.config.init_speed_x,0,time)
+        x_agent = self.calcule_distance(speed_x,0,time)
+        different_x = abs(x_target - x_agent)
+        resultat_distance = math.sqrt(different_x**2 + different_h**2)
+
         if resultat_distance < self.config.radius:
             hit = True
             reward = 1 - resultat_distance/self.config.radius
         else:
             reward = - resultat_distance/self.config.radius
-        if self.config.init_speed_x>speed_x:
-            reward = -(self.config.init_speed_x-speed_x)*1000
         done = True
         # print('Get a note:',reward)
         return np.array(state), reward, done, {"Hit": hit}
