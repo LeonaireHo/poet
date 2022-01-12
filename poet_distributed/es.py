@@ -118,7 +118,7 @@ class ESOptimizer:
                  fiber_pool,
                  fiber_shared,
                  theta,
-                 make_niche,
+                 make_flechette,
                  learning_rate,
                  batches_per_chunk,
                  batch_size,
