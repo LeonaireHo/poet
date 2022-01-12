@@ -38,7 +38,7 @@ def run_main(args,poet):
                        poet = poet)
 
 def main():
-    poet = True
+    poet = False
 
     parser = ArgumentParser()
     parser.add_argument('log_file')
