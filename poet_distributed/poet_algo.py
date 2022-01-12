@@ -308,7 +308,7 @@ class MultiESOptimizer:
         child_list = sorted(child_list, key=lambda x: x[3], reverse=True)
         return child_list
 
-    def adjust_envs_flechettes(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1):
+    def adjust_envs_flechettes(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1,env = None):
         # print('adjust_envs_flechettes',iteration,steps_before_adjust)
         if iteration > 0 and iteration % steps_before_adjust == 0:
             # print('adjust_envs_flechettes\n\n\n\n\n')
@@ -324,7 +324,7 @@ class MultiESOptimizer:
 
             nb_env_create = 0
             max_try = 20
-            while not nb_env_create and max_try >= 0:
+            while not nb_env_create and (max_try >= 0 or env is None):
                 max_try += -1
                 child_list = self.get_child_list(list_repro, max_children)
 
@@ -336,6 +336,8 @@ class MultiESOptimizer:
                 admitted = 0
                 for child in child_list:
                     new_env_config, seed, _, _ = child
+                    if env is not None:
+                        new_env_config = env
                     # targeted transfer
                     o = self.create_optimizer(new_env_config, seed, is_candidate=True)
                     score_child, theta_child = o.evaluate_transfer(self.optimizers)
@@ -383,13 +385,23 @@ class MultiESOptimizer:
                 continue
 
             flechette = self.fiber_shared["flechettes"]
-            #save model
-            print("flechette", flechette.keys())
-            for optim_id in flechette.keys():
-                print("save model id:",str(optim_id))
-                flechette[optim_id].model.save_model('model'+str(optim_id))
+            # #save model
+            # print("flechette", flechette.keys())
+            # for optim_id in flechette.keys():
+            #     print("save model id:",str(optim_id))
+            #     flechette[optim_id].model.save_model('model'+str(optim_id))
             self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
+            if iteration == iterations - self.args.adjust_interval * steps_before_transfer * self.args.max_num_envs:
+                hard_env_config = Env_config(
+                                    name='tablette_dur',
+                                    init_height=10,
+                                    init_speed_x=100,
+                                    init_speed_z=100,
+                                    distance=100,
+                                    radius=0.1)
+                self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
+                                            max_num_envs=self.args.max_num_envs, env=hard_env_config)
             for o in self.optimizers.values():
                 o.clean_dicts_before_iter()
             self.ind_es_step(iteration=iteration)

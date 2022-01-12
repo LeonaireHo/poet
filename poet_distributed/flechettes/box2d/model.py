@@ -163,11 +163,11 @@ class Model:
         self.data = data
         model_params = np.array(data[0])  # assuming other stuff is in data
         self.set_model_params(model_params)
-    def save_model(self,filename):
-        print("saved")
-        data = self.data
-        with open(filename, 'w+') as f:
-            f.write(json.dumps(data))
+    # def save_model(self,filename):
+    #     print("saved")
+    #     data = self.data
+    #     with open(filename, 'w+') as f:
+    #         f.write(json.dumps(data))
     def get_random_model_params(self, stdev=0.1):
         return np.random.randn(self.param_count) * stdev
 
