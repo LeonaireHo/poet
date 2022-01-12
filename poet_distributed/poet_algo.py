@@ -310,7 +310,7 @@ class MultiESOptimizer:
 
     def adjust_envs_flechettes(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1,env = None):
         # print('adjust_envs_flechettes',iteration,steps_before_adjust)
-        if iteration > 0 and iteration % steps_before_adjust == 0:
+        if iteration > 0 and iteration % steps_before_adjust == 0 or env is not None:
             # print('adjust_envs_flechettes\n\n\n\n\n')
             list_repro, list_delete = self.check_optimizer_status(iteration)
 
@@ -392,6 +392,7 @@ class MultiESOptimizer:
             #     flechette[optim_id].model.save_model('model'+str(optim_id))
 
             if True:#iteration == iterations - self.args.adjust_interval * steps_before_transfer * self.args.max_num_envs:
+                print("Test avec le plus complex env")
                 hard_env_config = Env_config(
                                     name='tablette_dur',
                                     init_height=10,
