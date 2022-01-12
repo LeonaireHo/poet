@@ -370,7 +370,7 @@ class MultiESOptimizer:
                  checkpointing=False,
                  reset_optimizer=True,
                  poet = True):
-
+        print("flechette''''''''''''''''''''''")
         for iteration in range(iterations):
             if not poet:
                 print('.', iteration, end='')
