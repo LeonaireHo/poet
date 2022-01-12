@@ -65,11 +65,11 @@ def initialize_master_fiber():
     global noise
     from .noise_module import noise
 
-def initialize_worker_fiber(arg_thetas, arg_niches):
-    global noise, thetas, niches
+def initialize_worker_fiber(arg_thetas, arg_flechette):
+    global noise, thetas, flechette
     from .noise_module import noise
     thetas = arg_thetas
-    niches = arg_niches
+    flechette = arg_flechette
 
 @functools.lru_cache(maxsize=1000)
 def fiber_get_theta(iteration, optim_id):
@@ -77,10 +77,10 @@ def fiber_get_theta(iteration, optim_id):
 
 @functools.lru_cache(maxsize=1000)
 def fiber_get_niche(iteration, optim_id):
-    return niches[optim_id]
+    return flechette[optim_id]
 
 def run_eval_batch_fiber(iteration, optim_id, batch_size, rs_seed):
-    global noise, niches, thetas
+    global noise, flechette, thetas
     random_state = np.random.RandomState(rs_seed)
     niche = fiber_get_niche(iteration, optim_id)
     theta = fiber_get_theta(iteration, optim_id)
@@ -91,7 +91,7 @@ def run_eval_batch_fiber(iteration, optim_id, batch_size, rs_seed):
     return EvalResult(returns=returns, lengths=lengths)
 
 def run_po_batch_fiber(iteration, optim_id, batch_size, rs_seed, noise_std):
-    global noise, niches, thetas
+    global noise, flechette, thetas
     random_state = np.random.RandomState(rs_seed)
     niche = fiber_get_niche(iteration, optim_id)
     theta = fiber_get_theta(iteration, optim_id)
@@ -158,8 +158,8 @@ class ESOptimizer:
         self.noise_limit = noise_limit
 
         self.fiber_shared = fiber_shared
-        niches = fiber_shared["niches"]
-        niches[optim_id] = make_niche()
+        flechette = fiber_shared["flechettes"]
+        flechette[optim_id] = make_niche()
 
         self.batches_per_chunk = batches_per_chunk
         self.batch_size = batch_size
@@ -386,15 +386,15 @@ class ESOptimizer:
         '''On all worker, add env_name to niche'''
         logger.debug('Optimizer {} add env {}...'.format(self.optim_id, env.name))
 
-        thetas = self.fiber_shared["niches"]
-        niches[self.optim_id].add_env(env)
+        thetas = self.fiber_shared["flechettes"]
+        flechette[self.optim_id].add_env(env)
 
     def delete_env(self, env_name):
         '''On all worker, delete env from niche'''
         logger.debug('Optimizer {} delete env {}...'.format(self.optim_id, env_name))
 
-        niches = self.fiber_shared["niches"]
-        niches[self.optim_id].delete_env(env_name)
+        flechettes = self.fiber_shared["flechettes"]
+        flechettes[self.optim_id].delete_env(env_name)
 
     def start_chunk_fiber(self, runner, batches_per_chunk, batch_size, *args):
         logger.debug('Optimizer {} spawning {} batches of size {}'.format(
@@ -404,8 +404,8 @@ class ESOptimizer:
 
         chunk_tasks = []
         pool = self.fiber_pool
-        niches = self.fiber_shared["niches"]
-        thetas = self.fiber_shared["thetas"]
+        # flechette = self.fiber_shared["flechettes"]
+        # thetas = self.fiber_shared["thetas"]
 
         for i in range(batches_per_chunk):
             chunk_tasks.append(

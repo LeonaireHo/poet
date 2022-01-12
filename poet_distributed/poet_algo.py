@@ -21,7 +21,7 @@ import numpy as np
 from poet_distributed.es import ESOptimizer
 from poet_distributed.es import initialize_worker_fiber
 from collections import OrderedDict
-from poet_distributed.niches.box2d.env import Env_config
+from poet_distributed.flechettes.box2d.env import Env_config
 from poet_distributed.reproduce_ops import Reproducer
 from poet_distributed.novelty import compute_novelty_vs_archive
 import json
@@ -30,7 +30,7 @@ import json
 def construct_flechette_fns_from_env(args, env, seed):
     def flechette_agnet(configs, seed):  # force python to make a new lexical scope
         def make_flechette():
-            from poet_distributed.niches import Flechette
+            from poet_distributed.flechettes import Flechette
             return Flechette(env_configs=configs,
                               seed=seed,
                               init=args.init,
@@ -38,10 +38,10 @@ def construct_flechette_fns_from_env(args, env, seed):
 
         return make_flechette
 
-    niche_name = env.name
+    flechette_name = env.name
     configs = (env,)
 
-    return niche_name, flechette_agnet(list(configs), seed)
+    return flechette_name, flechette_agnet(list(configs), seed)
 
 
 class MultiESOptimizer:
@@ -53,12 +53,12 @@ class MultiESOptimizer:
         manager = mp_ctx.Manager()
         self.manager = manager
         self.fiber_shared = {
-            "niches": manager.dict(),
+            "flechettes": manager.dict(),
             "thetas": manager.dict(),
         }
         self.fiber_pool = mp_ctx.Pool(args.num_workers, initializer=initialize_worker_fiber,
                                       initargs=(self.fiber_shared["thetas"],
-                                                self.fiber_shared["niches"]))
+                                                self.fiber_shared["flechettes"]))
 
         self.env_registry = OrderedDict()
         self.env_archive = OrderedDict()
@@ -71,23 +71,23 @@ class MultiESOptimizer:
                 start_from_config = json.load(f)
 
             logger.debug(start_from_config['path'])
-            logger.debug(start_from_config['niches'])
+            logger.debug(start_from_config['flechettes'])
             logger.debug(start_from_config['exp_name'])
 
             path = start_from_config['path']
             exp_name = start_from_config['exp_name']
             prefix = path + exp_name + '/' + exp_name + '.'
-            for niche_name, niche_file in sorted(start_from_config['niches'].items()):
-                logger.debug(niche_name)
-                niche_file_complete = prefix + niche_file
-                logger.debug(niche_file_complete)
-                with open(niche_file_complete) as f:
+            for flechette_name, flechette_file in sorted(start_from_config['flechettes'].items()):
+                logger.debug(flechette_name)
+                flechette_file_complete = prefix + flechette_file
+                logger.debug(flechette_file_complete)
+                with open(flechette_file_complete) as f:
                     data = json.load(f)
-                    logger.debug('loading file %s' % (niche_file_complete))
+                    logger.debug('loading file %s' % (flechette_file_complete))
                     model_params = np.array(data[0])  # assuming other stuff is in data
                     logger.debug(model_params)
 
-                env_def_file = prefix + niche_name + '.env.json'
+                env_def_file = prefix + flechette_name + '.env.json'
                 with open(env_def_file, 'r') as f:
                     exp = json.loads(f.read())
 
@@ -133,7 +133,7 @@ class MultiESOptimizer:
             fiber_pool=self.fiber_pool,
             fiber_shared=self.fiber_shared,
             theta=theta,
-            make_niche=flechette_fn,
+            make_flechette=flechette_fn,
             learning_rate=self.args.learning_rate,
             lr_decay=self.args.lr_decay,
             lr_limit=self.args.lr_limit,
@@ -153,8 +153,8 @@ class MultiESOptimizer:
 
     def add_optimizer(self, env, seed, created_at=0, model_params=None):
         '''
-            creat a new optimizer/niche
-            created_at: the iteration when this niche is created
+            creat a new optimizer/flechettes
+            created_at: the iteration when this flechettes is created
         '''
         o = self.create_optimizer(env, seed, created_at, model_params)
         optim_id = o.optim_id
@@ -173,7 +173,7 @@ class MultiESOptimizer:
 
     def delete_optimizer(self, optim_id):
         assert optim_id in self.optimizers.keys()
-        # assume optim_id == env_id for single_env niches
+        # assume optim_id == env_id for single_env flechettes
         o = self.optimizers.pop(optim_id)
         del o
         assert optim_id in self.env_registry.keys()
@@ -243,7 +243,7 @@ class MultiESOptimizer:
         repro_candidates, delete_candidates = [], []
         for optim_id in self.env_registry.keys():
             o = self.optimizers[optim_id]
-            logger.info("niche {} created at {} start_score {} current_self_evals {}".format(
+            logger.info("flechettes {} created at {} start_score {} current_self_evals {}".format(
                 optim_id, o.created_at, o.start_score, o.self_evals))
             print('self_evals',o.self_evals)
             if o.self_evals >= self.args.repro_threshold:
@@ -308,18 +308,18 @@ class MultiESOptimizer:
         child_list = sorted(child_list, key=lambda x: x[3], reverse=True)
         return child_list
 
-    def adjust_envs_niches(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1):
-        # print('adjust_envs_niches',iteration,steps_before_adjust)
+    def adjust_envs_flechettes(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1):
+        # print('adjust_envs_flechettes',iteration,steps_before_adjust)
         if iteration > 0 and iteration % steps_before_adjust == 0:
-            # print('adjust_envs_niches\n\n\n\n\n')
+            # print('adjust_envs_flechettes\n\n\n\n\n')
             list_repro, list_delete = self.check_optimizer_status(iteration)
 
             if len(list_repro) == 0:
                 return
 
-            logger.info("list of niches to reproduce")
+            logger.info("list of flechettes to reproduce")
             logger.info(list_repro)
-            logger.info("list of niches to delete")
+            logger.info("list of flechettes to delete")
             logger.info(list_delete)
 
             nb_env_create = 0
@@ -381,10 +381,11 @@ class MultiESOptimizer:
                         o.save_to_logger(iteration)
                         print('Best score:',o.get_best_score)
                 continue
-
-            self.adjust_envs_niches(iteration, self.args.adjust_interval * steps_before_transfer,
+            flechette = self.fiber_shared["flechettes"]
+            for optim_id in flechette.keys():
+                flechette[optim_id].save_model('model'+str(optim_id))
+            self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
-
             for o in self.optimizers.values():
                 o.clean_dicts_before_iter()
             self.ind_es_step(iteration=iteration)
