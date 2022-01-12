@@ -399,7 +399,7 @@ class MultiESOptimizer:
             #     print("save model id:",str(optim_id))
             #     flechette[optim_id].model.save_model('model'+str(optim_id))
 
-            if True:#iteration == iterations - self.args.adjust_interval * steps_before_transfer * self.args.max_num_envs:
+            if iteration == iterations - self.args.adjust_interval * steps_before_transfer * self.args.max_num_envs:
                 print("Test avec le plus complex env")
                 hard_env_config = Env_config(
                                     name='tablette_dur',
