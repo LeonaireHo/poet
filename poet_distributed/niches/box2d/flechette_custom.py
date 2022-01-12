@@ -143,7 +143,7 @@ class FlechetteCustom(gym.Env):
         self.viewer = None
         self._reset()
 
-    def calcule_distance(v0,a,t):#speed_init,a,t
+    def calcule_distance(self,v0,a,t):#speed_init,a,t
         return 0.5 * a * t * t + v0 * t
 
     def sensor(self):
