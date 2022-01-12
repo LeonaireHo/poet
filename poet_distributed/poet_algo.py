@@ -310,6 +310,14 @@ class MultiESOptimizer:
 
     def adjust_envs_flechettes(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1,env = None):
         # print('adjust_envs_flechettes',iteration,steps_before_adjust)
+        if env is not None:
+            seed = np.random.randint(1000000)
+            o = self.create_optimizer(env, seed, is_candidate=True)
+            score_child, theta_child = o.evaluate_transfer(self.optimizers)
+            self.add_optimizer(env=env, seed=seed, created_at=iteration,
+                               model_params=np.array(theta_child))
+            return
+
         if iteration > 0 and iteration % steps_before_adjust == 0 or env is not None:
             # print('adjust_envs_flechettes\n\n\n\n\n')
             list_repro, list_delete = self.check_optimizer_status(iteration)
@@ -324,7 +332,7 @@ class MultiESOptimizer:
 
             nb_env_create = 0
             max_try = 20
-            while not nb_env_create and (max_try >= 0 or env is None):
+            while not nb_env_create and max_try >= 0:
                 max_try += -1
                 child_list = self.get_child_list(list_repro, max_children)
 
