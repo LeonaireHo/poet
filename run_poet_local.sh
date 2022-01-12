@@ -20,7 +20,7 @@ python -u master.py \
   --batches_per_chunk=256 \
   --eval_batch_size=1 \
   --eval_batches_per_step=5 \
-  --master_seed=24582922 \
+  --master_seed=19980515 \
   --noise_std=0.1 \
   --noise_decay=0.999 \
   --noise_limit=0.01 \
