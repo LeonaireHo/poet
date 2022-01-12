@@ -164,6 +164,7 @@ class Model:
         model_params = np.array(data[0])  # assuming other stuff is in data
         self.set_model_params(model_params)
     def save_model(self,filename):
+        print("saved")
         data = self.data
         with open(filename, 'w+') as f:
             f.write(json.dumps(data))
