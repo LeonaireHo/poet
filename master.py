@@ -39,7 +39,7 @@ def run_main(args,poet):
 
 def main():
     poet = False
-    print(sys.argv)
+
     parser = ArgumentParser()
     parser.add_argument('log_file')
     parser.add_argument('--init', default='random')
