@@ -381,13 +381,14 @@ class MultiESOptimizer:
                         o.save_to_logger(iteration)
                         print('Best score:',o.get_best_score)
                 continue
+
             flechette = self.fiber_shared["flechettes"]
-            print("flechette",flechette.keys())
             #save model
             for optim_id in flechette.keys():
                 print("save model id:",str(optim_id))
                 flechette[optim_id].save_model('model'+str(optim_id))
 
+            print("flechette", flechette.keys())
             self.adjust_envs_flechettes(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
             for o in self.optimizers.values():
