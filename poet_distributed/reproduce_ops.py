@@ -115,8 +115,8 @@ class Reproducer:
         child = Env_config(
             name=child_name,
             init_height=init_height,
-            init_speed_x=init_speed_z,
-            init_speed_y=init_speed_x,
+            init_speed_x=init_speed_x,
+            init_speed_z=init_speed_z,
             distance=distance,
             radius=radius
             )
