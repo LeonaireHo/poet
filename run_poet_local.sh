@@ -32,4 +32,4 @@ python -u master.py \
   --propose_with_adam \
   --steps_before_transfer=20 \
   --num_workers 3 \
-  --n_iterations=1000 2>&1 | tee ~/ipp/$experiment/run.log
+  --n_iterations=5000 2>&1 | tee ~/ipp/$experiment/run.log
