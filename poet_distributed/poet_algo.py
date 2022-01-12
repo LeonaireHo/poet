@@ -382,6 +382,7 @@ class MultiESOptimizer:
                         print('Best score:',o.get_best_score)
                 continue
             flechette = self.fiber_shared["flechettes"]
+            print("flechette",flechette.keys())
             #save model
             for optim_id in flechette.keys():
                 print("save model id:",str(optim_id))
