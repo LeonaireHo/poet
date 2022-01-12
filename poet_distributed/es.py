@@ -159,7 +159,7 @@ class ESOptimizer:
 
         self.fiber_shared = fiber_shared
         flechette = fiber_shared["flechettes"]
-        flechette[optim_id] = make_niche()
+        flechette[optim_id] = make_flechette()
 
         self.batches_per_chunk = batches_per_chunk
         self.batch_size = batch_size
