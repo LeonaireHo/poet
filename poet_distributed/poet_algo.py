@@ -299,7 +299,7 @@ class MultiESOptimizer:
                 score = o.evaluate_theta(self.optimizers[parent_optim_id].theta)
                 del o
                 if self.pass_mc(score):
-                    print('pass',score)
+                    # print('pass',score)
                     novelty_score = compute_novelty_vs_archive(self.env_archive, new_env_config, k=5)
                     logger.debug("{} passed mc, novelty score {}".format(score, novelty_score))
                     child_list.append((new_env_config, seed, parent_optim_id, novelty_score))
@@ -341,7 +341,7 @@ class MultiESOptimizer:
                     # targeted transfer
                     o = self.create_optimizer(new_env_config, seed, is_candidate=True)
                     score_child, theta_child = o.evaluate_transfer(self.optimizers)
-                    # print(score_child)
+                    print("child score:",score_child)
                     del o
                     if self.pass_mc(score_child):  # check mc
                         nb_env_create += 1
